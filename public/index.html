@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Active Badge</title>
+    <style>
+        :root {
+            --bg-primary: #f5f1ed;
+            --bg-secondary: #e8dfd6;
+            --bg-card: #ffffff;
+            --text-primary: #3d3229;
+            --text-secondary: #6b5d52;
+            --accent: #a67c52;
+            --accent-hover: #8b6844;
+            --border: #d4c4b5;
+            --success: #7a9b6f;
+            --error: #c76b6b;
+            --shadow: rgba(61, 50, 41, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #2a2420;
+            --bg-secondary: #1f1b18;
+            --bg-card: #352f2a;
+            --text-primary: #e8dfd6;
+            --text-secondary: #b8a99a;
+            --accent: #c9956b;
+            --accent-hover: #d4a67a;
+            --border: #4a3f36;
+            --success: #8fb582;
+            --error: #d88585;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: background 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* <CHANGE> Updated sun icon to use light color in dark mode for better visibility */
+        #sunIcon {
+            stroke: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .success-section {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 2px solid var(--success);
+        }
+
+        .success-section.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-title {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* <CHANGE> Added styles for URL section labels */
+        .url-section {
+            margin-bottom: 16px;
+        }
+
+        .url-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .url-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .url-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .url-display {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+        }
+
+        .message {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.error {
+            background: rgba(199, 107, 107, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .message.success {
+            background: rgba(122, 155, 111, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <!-- Moon icon (shown in light mode) -->
+        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--text-primary)">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <!-- Sun icon (shown in dark mode) -->
+        <!-- <CHANGE> Simplified sun icon with better contrast in dark mode -->
+        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" style="display: none;">
+            <circle cx="12" cy="12" r="4" stroke="var(--text-primary)" stroke-width="2"/>
+            <line x1="12" y1="2" x2="12" y2="4" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="12" y1="20" x2="12" y2="22" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="2" y1="12" x2="4" y2="12" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="20" y1="12" x2="22" y2="12" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
+
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Discord Bot Setup</h1>
+                <p>Register your bot commands with Discord</p>
+            </div>
+
+            <form id="setupForm">
+                <div class="form-group">
+                    <label for="token">Bot Token</label>
+                    <input 
+                        type="password" 
+                        id="token" 
+                        placeholder="Enter your Discord bot token"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="publicKey">Application Public Key</label>
+                    <input 
+                        type="text" 
+                        id="publicKey" 
+                        placeholder="Enter your application public key"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    Register Command
+                </button>
+            </form>
+
+            <div class="message" id="message"></div>
+
+            <div class="success-section" id="successSection">
+                <div class="success-title">
+                    Command Registered Successfully!
+                </div>
+                
+                <!-- <CHANGE> Added bot invite URL section -->
+                <div class="url-section">
+                    <p class="url-label">Add bot to your server:</p>
+                    <div class="url-container">
+                        <div class="url-display" id="inviteUrl"></div>
+                        <button class="copy-btn" id="copyInviteBtn">Copy</button>
+                    </div>
+                </div>
+
+                <div class="url-section">
+                    <p class="url-label">Your interaction URL:</p>
+                    <div class="url-container">
+                        <div class="url-display" id="interactionUrl"></div>
+                        <button class="copy-btn" id="copyBtn">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'block';
+            } else {
+                moonIcon.style.display = 'block';
+                sunIcon.style.display = 'none';
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const theme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeIcon(theme);
+        });
+
+        // Form submission
+        const form = document.getElementById('setupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const message = document.getElementById('message');
+        const successSection = document.getElementById('successSection');
+        const interactionUrl = document.getElementById('interactionUrl');
+        const copyBtn = document.getElementById('copyBtn');
+        const inviteUrlDisplay = document.getElementById('inviteUrl');
+        const copyInviteBtn = document.getElementById('copyInviteBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = document.getElementById('token').value.trim();
+            const publicKey = document.getElementById('publicKey').value.trim();
+
+            // Hide previous messages
+            message.classList.remove('show');
+            successSection.classList.remove('show');
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Registering<span class="loading"></span>';
+
+            try {
+                // <CHANGE> Fetch bot info to get application ID
+                const botInfoResponse = await fetch('https://discord.com/api/v10/users/@me', {
+                    headers: {
+                        'Authorization': `Bot ${token}`
+                    }
+                });
+
+                if (!botInfoResponse.ok) {
+                    throw new Error('Failed to fetch bot information');
+                }
+
+                const botInfo = await botInfoResponse.json();
+                const applicationId = botInfo.id;
+
+                // <CHANGE> Updated to send to local API endpoint with new payload format
+                const response = await fetch(
+                    window.location.href.replace(/\/$/, "") + "/api/register",
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bot ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            url: `https://discord.com/api/v10/applications/${applicationId}/commands`,
+                            payload: {
+                                options: [],
+                                name: "badge",
+                                name_localizations: undefined,
+                                description: "Makes you eligible for the Active Developer Badge and provides instructions for your next action.",
+                                description_localizations: undefined,
+                                contexts: undefined,
+                                default_permission: undefined,
+                                default_member_permissions: undefined,
+                                dm_permission: undefined,
+                                integration_types: undefined,
+                                nsfw: undefined,
+                                type: 1
+                            }
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to register command');
+                }
+
+                // Success! Show the interaction URL
+                const inviteLink = `https://discord.com/api/oauth2/authorize?client_id=${applicationId}&permissions=0&scope=bot%20applications.commands`;
+                inviteUrlDisplay.textContent = inviteLink;
+
+                const currentUrl = window.location.href.replace(/\/$/, '');
+                const fullUrl = `${currentUrl}/api/handle?publicKey=${publicKey}`;
+                
+                interactionUrl.textContent = fullUrl;
+                successSection.classList.add('show');
+
+                showMessage('Command registered successfully!', 'success');
+
+            } catch (error) {
+                showMessage('Failed to register command', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Register Command';
+            }
+        });
+
+        // <CHANGE> Added copy functionality for invite URL
+        copyInviteBtn.addEventListener('click', async () => {
+            const url = inviteUrlDisplay.textContent;
+            
+            try {
+                await navigator.clipboard.writeText(url);
+                const originalText = copyInviteBtn.textContent;
+                copyInviteBtn.textContent = 'Copied!';
+                copyInviteBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyInviteBtn.textContent = originalText;
+                    copyInviteBtn.classList.remove('copied');
+                }, 2000);
+            } catch (error) {
+                showMessage('Failed to copy to clipboard', 'error');
+            }
+        });
+
+        // Copy button functionality
+        copyBtn.addEventListener('click', async () => {
+            const url = interactionUrl.textContent;
+            
+            try {
+                await navigator.clipboard.writeText(url);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            } catch (error) {
+                showMessage('Failed to copy to clipboard', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

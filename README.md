@@ -1,5 +1,7 @@
 # Discord Active Developer Badge Guide
 
+Join discord, for support [https://discord.gg/sjBKSAFR](https://discord.gg/sjBKSAFR)
+
 Follow these steps to obtain the Discord Active Developer Badge:
 
 1. Visit [Badge Hunt](https://badge-hunt.vercel.app).
